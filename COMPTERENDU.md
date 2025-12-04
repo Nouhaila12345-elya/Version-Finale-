@@ -1,22 +1,23 @@
-Analyse Prédictive appliquée au Dataset Bancaire
-Pré-traitement, EDA et Modélisation Machine Learning
+# **Analyse Prédictive appliquée au Dataset Bancaire**
 
-Nom de l'étudiante – ENCGS
+ ## Pré-traitement, EDA et Modélisation Machine Learning
+
+El yazidi Nouhaila – ENCGS
 Date : Aujourd’hui
 
-Table des matières
+- Table des matières
 
-Introduction
+- Introduction
 
-Méthodologie
+- Méthodologie
 
-Analyse Exploratoire des Données (EDA)
+- Analyse Exploratoire des Données (EDA)
 
-Modélisation
+- Modélisation
 
-Conclusion
+- Conclusion
 
-Introduction
+### Introduction
 
 Dans un contexte bancaire où la prise de décision doit être rapide, fiable et fondée sur des données, la prédiction du comportement des clients constitue un enjeu majeur.
 
@@ -24,7 +25,7 @@ L'objectif de ce projet est de développer un pipeline complet allant du pré-tr
 
 Ce rapport présente les choix méthodologiques, les analyses exploratoires, les performances des modèles testés ainsi que les limites de l’approche.
 
-Méthodologie
+### Méthodologie
 Pré-traitement des données
 Nettoyage
 
@@ -40,7 +41,7 @@ la catégorie "Unknown" pour certaines variables catégorielles
 
 une imputation KNN pour les variables ayant une structure complexe
 
-Encodage
+### Encodage
 
 Selon la nature des variables :
 
@@ -50,7 +51,7 @@ Label Encoding pour les variables ordinales
 
 Target Encoding pour les variables catégorielles fortement corrélées à la cible
 
-Normalisation
+### Normalisation
 
 Une standardisation par Z-score a permis d’homogénéiser les échelles des variables avant la modélisation, particulièrement utile pour SVM et KNN.
 
@@ -60,12 +61,12 @@ Visualisation des distributions
 
 La figure ci-dessous montre la distribution des âges, révélant une concentration entre 25 et 55 ans.
 
-Détection d'outliers
+### Détection d'outliers
 
 Les boxplots indiquent la présence de valeurs extrêmes notamment dans les variables balance et duration.
 <img width="1003" height="528" alt="image" src="https://github.com/user-attachments/assets/8477340b-e89e-4d0a-93a8-deedaba00706" />
 
-Analyse des corrélations
+### Analyse des corrélations
 <img width="900" height="759" alt="image" src="https://github.com/user-attachments/assets/e2ebca4c-5ccd-4b60-9cca-d90a6232b889" />
 
 La heatmap met en évidence une corrélation positive importante entre duration et la variable cible. Cette variable joue un rôle essentiel dans la prédiction.
@@ -80,7 +81,7 @@ Transformation logarithmique de balance
 
 Création d’un indicateur ContactedBefore basé sur campaign et previous
 
-Modélisation
+### Modélisation
 Algorithmes testés
 
 Trois modèles ont été sélectionnés :
@@ -102,7 +103,7 @@ Random Forest	0.91	0.88	0.94	0.33
 XGBoost	0.93	0.90	0.96	0.29
 Courbe ROC
 
-Analyse des erreurs
+### Analyse des erreurs
 <img width="519" height="435" alt="image" src="https://github.com/user-attachments/assets/2dc36081-0943-4d7f-b1a3-6e45b49905e9" />
 
 La matrice de confusion de XGBoost montre que :
@@ -111,11 +112,11 @@ Les faux positifs restent modérés
 
 Les faux négatifs sont faibles, ce qui est important pour un modèle bancaire
 
-Conclusion
+### Conclusion
 
 Le modèle XGBoost offre les meilleures performances globales avec un ROC-AUC de 0.96.
 
-Limites :
+### Limites :
 
 Le dataset est fortement déséquilibré
 
