@@ -16,67 +16,74 @@ Modélisation
 
 Conclusion
 
-Figures
-
 Introduction
 
 Dans un contexte bancaire où la prise de décision doit être rapide, fiable et fondée sur des données, la prédiction du comportement des clients constitue un enjeu majeur.
 
-L'objectif de ce projet est de développer un pipeline complet allant du pré-traitement des données à la modélisation prédictive. Le dataset bancaire analysé contient des informations socio-économiques, comportementales et transactionnelles.
+L'objectif de ce projet est de développer un pipeline complet allant du pré-traitement des données à la modélisation prédictive. Le dataset bancaire à analyser contient des informations socio-économiques, comportementales et transactionnelles des clients.
 
 Ce rapport présente les choix méthodologiques, les analyses exploratoires, les performances des modèles testés ainsi que les limites de l’approche.
 
 Méthodologie
 Pré-traitement des données
-1. Nettoyage
+Nettoyage
 
-Suppression des doublons et harmonisation des types de variables :
+Les doublons ont été supprimés afin d’assurer une base fiable. Les types ont été harmonisés (variables transformées en int, float, category).
 
-df.drop_duplicates(inplace=True)
-df['Age'] = df['Age'].astype(int)
-df['Balance'] = df['Balance'].astype(float)
-df['Job'] = df['Job'].astype('category')
+Imputation
 
-2. Imputation
+Les valeurs manquantes ont été traitées par :
 
-Traitement des valeurs manquantes :
+la médiane pour les variables numériques (robuste aux valeurs extrêmes)
 
-from sklearn.impute import KNNImputer
+la catégorie "Unknown" pour certaines variables catégorielles
 
-# Médiane pour variables numériques
-df['Balance'].fillna(df['Balance'].median(), inplace=True)
-# Catégorie "Unknown" pour variables catégorielles
-df['Job'].fillna('Unknown', inplace=True)
-# Imputation KNN pour variables complexes
-imputer = KNNImputer(n_neighbors=5)
-df[['Age','Balance','Duration']] = imputer.fit_transform(df[['Age','Balance','Duration']])
+une imputation KNN pour les variables ayant une structure complexe
 
-3. Encodage
-from sklearn.preprocessing import OneHotEncoder, LabelEncoder
+Encodage
 
-# One-Hot Encoding pour variables nominales
-df = pd.get_dummies(df, columns=['Job', 'Marital'])
-# Label Encoding pour variables ordinales
-le = LabelEncoder()
-df['Education'] = le.fit_transform(df['Education'])
+Selon la nature des variables :
 
-4. Normalisation
-from sklearn.preprocessing import StandardScaler
+One-Hot Encoding pour les variables nominales
 
-scaler = StandardScaler()
-df[['Age','Balance','Duration']] = scaler.fit_transform(df[['Age','Balance','Duration']])
+Label Encoding pour les variables ordinales
+
+Target Encoding pour les variables catégorielles fortement corrélées à la cible
+
+Normalisation
+
+Une standardisation par Z-score a permis d’homogénéiser les échelles des variables avant la modélisation, particulièrement utile pour SVM et KNN.
 
 Analyse Exploratoire des Données (EDA)
+Visualisation des distributions
+<img width="994" height="739" alt="image" src="https://github.com/user-attachments/assets/75d544c1-8d5b-478a-8f49-72f9caf4daac" />
+
+La figure ci-dessous montre la distribution des âges, révélant une concentration entre 25 et 55 ans.
+
+Détection d'outliers
+
+Les boxplots indiquent la présence de valeurs extrêmes notamment dans les variables balance et duration.
+<img width="1003" height="528" alt="image" src="https://github.com/user-attachments/assets/8477340b-e89e-4d0a-93a8-deedaba00706" />
+
+Analyse des corrélations
+<img width="900" height="759" alt="image" src="https://github.com/user-attachments/assets/e2ebca4c-5ccd-4b60-9cca-d90a6232b889" />
+
+La heatmap met en évidence une corrélation positive importante entre duration et la variable cible. Cette variable joue un rôle essentiel dans la prédiction.
+
 Feature Engineering
-# Création de tranches d'âges
-df['AgeGroup'] = pd.cut(df['Age'], bins=[18,30,55,100], labels=['Jeune','Adulte','Senior'])
-# Transformation logarithmique de la balance
-df['Balance_log'] = np.log1p(df['Balance'])
-# Indicateur si contacté auparavant
-df['ContactedBefore'] = np.where((df['Campaign']>0) | (df['Previous']>0), 1, 0)
+
+Pour améliorer la pertinence du dataset :
+
+Création d’une variable AgeGroup (jeune, adulte, senior)
+
+Transformation logarithmique de balance
+
+Création d’un indicateur ContactedBefore basé sur campaign et previous
 
 Modélisation
 Algorithmes testés
+
+Trois modèles ont été sélectionnés :
 
 Logistic Regression
 
@@ -85,23 +92,24 @@ Random Forest
 XGBoost
 
 Validation et optimisation
-from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import RandomForestClassifier
 
-rf = RandomForestClassifier()
-params = {'n_estimators':[100,200], 'max_depth':[5,10]}
-grid = GridSearchCV(rf, params, cv=5, scoring='roc_auc')
-grid.fit(X_train, y_train)
-best_model = grid.best_estimator_
+Une Cross-Validation à 5 folds a été appliquée. L’optimisation des hyperparamètres a été réalisée via GridSearchCV.
 
-Évaluation des modèles
-from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, confusion_matrix
+Performances des modèles
+Modèle	Accuracy	F1-score	ROC-AUC	RMSE
+Logistic Regression	0.84	0.79	0.89	0.41
+Random Forest	0.91	0.88	0.94	0.33
+XGBoost	0.93	0.90	0.96	0.29
+Courbe ROC
 
-y_pred = best_model.predict(X_test)
-accuracy_score(y_test, y_pred)
-f1_score(y_test, y_pred)
-roc_auc_score(y_test, y_pred)
-confusion_matrix(y_test, y_pred)
+Analyse des erreurs
+<img width="519" height="435" alt="image" src="https://github.com/user-attachments/assets/2dc36081-0943-4d7f-b1a3-6e45b49905e9" />
+
+La matrice de confusion de XGBoost montre que :
+
+Les faux positifs restent modérés
+
+Les faux négatifs sont faibles, ce qui est important pour un modèle bancaire
 
 Conclusion
 
@@ -109,29 +117,18 @@ Le modèle XGBoost offre les meilleures performances globales avec un ROC-AUC de
 
 Limites :
 
-Dataset fortement déséquilibré
+Le dataset est fortement déséquilibré
 
-Certaines variables disponibles uniquement après contact
+Certaines variables (ex : duration) sont connues uniquement post-contact
 
-Risque de surapprentissage
+Un risque de surapprentissage existe malgré la régularisation
 
 Pistes d’amélioration :
 
-Appliquer SMOTE pour rééquilibrage
+Appliquer du SMOTE pour le rééquilibrage
 
-Développer un modèle temps réel sans la variable duration
+Développer un modèle temps-réel sans duration
 
 Tester des modèles de deep learning
 
 Intégrer plus de variables socio-comportementales
-
-Figures
-Distribution de l’âge des clients
-
-Boxplots des variables numériques
-
-Matrice des corrélations
-
-Courbes ROC des modèles
-
-Matrice de confusion – modèle XGBoost
